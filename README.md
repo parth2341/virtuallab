@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔬 VirtualLab — Interactive Science Experiments
 
-## Getting Started
+A premium, full-stack virtual laboratory web application built with **Next.js 16**, **Supabase**, and **TypeScript**. Students can perform interactive physics and chemistry experiments, visualize results with real-time graphs, solve problems with built-in calculators, and save their experiment data to a personal dashboard.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ Features
+
+- **10 Interactive Experiments** across Physics & Chemistry
+- **Real-time Canvas Simulations** — animated visualizations rendered via HTML5 Canvas API
+- **Dynamic Graphs** — interactive, auto-updating graphs with inline sliders
+- **Formula Calculators** — step-by-step problem-solving with formulas
+- **User Authentication** — email-based sign up/sign in with Supabase Auth
+- **Personal Dashboard** — save, view, and manage experiment results
+- **Premium Dark UI** — glassmorphism, gradients, smooth animations
+- **Fully Responsive** — works on desktop, tablet, and mobile
+
+---
+
+## 🧪 Experiments
+
+| #  | Experiment               | Subject   | Key Formula / Concept               |
+|----|--------------------------|-----------|--------------------------------------|
+| 1  | ⚡ Ohm's Law             | Physics   | V = I × R                           |
+| 2  | 🎯 Projectile Motion     | Physics   | R = v²sin(2θ)/g                     |
+| 3  | 🧪 Acid-Base Titration   | Chemistry | pH curve & equivalence point         |
+| 4  | 🕐 Simple Pendulum       | Physics   | T = 2π√(L/g)                        |
+| 5  | 🔬 Convex Lens Optics    | Physics   | 1/f = 1/v − 1/u                     |
+| 6  | 🔩 Hooke's Law           | Physics   | F = kx                              |
+| 7  | 🌡️ Newton's Cooling Law  | Physics   | T(t) = Tₐ + (T₀−Tₐ)·e^(−kt)       |
+| 8  | 🔌 RC Circuit            | Physics   | τ = RC, V = V₀(1−e^(−t/τ))         |
+| 9  | 🌈 Snell's Law           | Physics   | n₁ sin θ₁ = n₂ sin θ₂              |
+| 10 | 💨 Boyle's Law           | Chemistry | PV = constant (at constant T)       |
+
+Each experiment has **3 tabs**:
+1. **⚡ Simulation** — interactive canvas-based visualization with adjustable controls
+2. **📊 Graphs** — real-time updating graphs with inline parameter sliders
+3. **🧮 Calculator** — formula solver with step-by-step solution display
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer       | Technology                        | Purpose                              |
+|-------------|-----------------------------------|--------------------------------------|
+| Framework   | Next.js 16 (App Router)           | Server-side rendering, routing       |
+| Frontend    | React 19 + TypeScript             | UI components, state management      |
+| Styling     | Vanilla CSS + CSS Variables       | Premium dark theme, glassmorphism    |
+| Backend     | Supabase                          | Authentication, PostgreSQL database  |
+| Graphs      | HTML5 Canvas API                  | Custom-drawn, real-time graphs       |
+| Deployment  | Vercel / Netlify (compatible)     | Production hosting                   |
+
+---
+
+## 📁 Project Structure
+
+```
+virtual-lab/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/              # Auth routes (login, signup)
+│   │   │   ├── login/page.tsx
+│   │   │   └── signup/page.tsx
+│   │   ├── dashboard/           # User dashboard (saved results)
+│   │   │   └── page.tsx
+│   │   ├── experiments/
+│   │   │   ├── page.tsx         # Experiments listing page
+│   │   │   └── [slug]/page.tsx  # Dynamic experiment page
+│   │   ├── globals.css          # Global styles & design system
+│   │   ├── layout.tsx           # Root layout
+│   │   └── page.tsx             # Home page
+│   ├── components/
+│   │   ├── experiments/         # 10 experiment components
+│   │   │   ├── OhmsLaw.tsx
+│   │   │   ├── ProjectileMotion.tsx
+│   │   │   ├── AcidBaseTitration.tsx
+│   │   │   ├── Pendulum.tsx
+│   │   │   ├── LensOptics.tsx
+│   │   │   ├── HookesLaw.tsx
+│   │   │   ├── NewtonCooling.tsx
+│   │   │   ├── RCCircuit.tsx
+│   │   │   ├── SnellsLaw.tsx
+│   │   │   └── BoylesLaw.tsx
+│   │   ├── Graph.tsx            # Reusable graph component
+│   │   ├── FormulaCalculator.tsx # Reusable calculator component
+│   │   ├── Navbar.tsx           # Navigation bar
+│   │   └── Footer.tsx           # Footer
+│   └── lib/
+│       └── supabase/            # Supabase client setup
+│           ├── client.ts        # Browser client
+│           └── server.ts        # Server client
+├── supabase/
+│   └── schema.sql               # Database schema
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- A Supabase account (free tier works)
 
-## Learn More
+### Installation
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd virtual-lab
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 2. Install dependencies
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 3. Set up environment variables
+#    Create a .env.local file with your Supabase credentials:
+echo "NEXT_PUBLIC_SUPABASE_URL=your-supabase-url" > .env.local
+echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key" >> .env.local
 
-## Deploy on Vercel
+# 4. Apply the database schema
+#    Run the contents of supabase/schema.sql in your Supabase SQL Editor
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# 5. Start the development server
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+---
+
+## 📷 Pages Overview
+
+| Page              | Route                        | Description                           |
+|-------------------|------------------------------|---------------------------------------|
+| Home              | `/`                          | Landing page with hero & feature cards |
+| Experiments       | `/experiments`               | Browse all 10 experiments             |
+| Experiment Detail | `/experiments/[slug]`        | Individual experiment with 3 tabs     |
+| Dashboard         | `/dashboard`                 | User's saved experiment results       |
+| Login             | `/login`                     | Email-based sign in                   |
+| Sign Up           | `/signup`                    | Create new account                    |
+
+---
+
+## 📄 License
+
+This project is built for educational purposes.
