@@ -119,8 +119,14 @@ export default function SignupPage() {
           marginBottom: '20px',
         }}>
           {error}
+          {step === 'otp' && error.includes('expired') && (
+            <p style={{ marginTop: '8px', fontSize: '12px' }}>
+              Check your Spam folder if you haven&apos;t received the code.
+            </p>
+          )}
         </div>
       )}
+
 
       {step === 'details' ? (
         <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
