@@ -6,6 +6,9 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { createClient } from '@/lib/supabase/client';
+import Graph from '@/components/Graph';
+import { useMemo } from 'react';
+
 
 interface ExperimentResult {
   id: string;
@@ -25,6 +28,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<{ email?: string; full_name?: string } | null>(null);
   const [results, setResults] = useState<ExperimentResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   const router = useRouter();
   const supabase = createClient();
 
@@ -78,11 +83,35 @@ export default function DashboardPage() {
     return Object.entries(output)
       .map(([key, val]) => {
         const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-        const value = typeof val === 'number' ? (Number.isInteger(val) ? val : Number(val).toFixed(4)) : val;
+        const value = typeof val === 'number' ? (Number.isInteger(val) ? val : Number(val).toFixed(2)) : val;
         return `${label}: ${value}`;
       })
       .join(' | ');
   };
+
+  const getGraphData = (params: Record<string, unknown>, mode: 'charge' | 'discharge') => {
+    const resistance = (params.resistance as number) || 1000;
+    const capacitance = (params.capacitance as number) || 100;
+    const voltage = (params.voltage as number) || 9;
+    
+    const capF = capacitance * 1e-6;
+    const tau = resistance * capF;
+    const tMax = tau * 5;
+    const step = tMax / 50;
+    
+    const vPts = [];
+    const iPts = [];
+    
+    for (let t = 0; t <= tMax; t += step) {
+      const v = mode === 'charge' ? voltage * (1 - Math.exp(-t / tau)) : voltage * Math.exp(-t / tau);
+      const i = (voltage / resistance) * Math.exp(-t / tau);
+      vPts.push({ x: parseFloat((t * 1000).toFixed(1)), y: v });
+      iPts.push({ x: parseFloat((t * 1000).toFixed(1)), y: i * 1000 });
+    }
+    
+    return { vPts, iPts, tau: tau * 1000 };
+  };
+
 
   if (loading) {
     return (
@@ -195,57 +224,131 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {results.map((result) => (
-                  <div key={result.id} className="glass-card" style={{
-                    padding: '20px 24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                    flexWrap: 'wrap',
-                  }}>
-                    <div style={{
-                      width: '44px', height: '44px', borderRadius: '12px',
-                      background: 'rgba(139, 92, 246, 0.1)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '22px', flexShrink: 0,
+                {results.map((result) => {
+                  const isExpanded = expandedId === result.id;
+                  const mode = (result.input_params.mode as 'charge' | 'discharge') || 'charge';
+                  const { vPts, iPts, tau } = getGraphData(result.input_params, mode);
+
+                  return (
+                    <div key={result.id} className="glass-card" style={{
+                      padding: '0',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}>
-                      {result.experiments?.icon || '🧪'}
-                    </div>
-
-                    <div style={{ flex: 1, minWidth: '200px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                        <Link
-                          href={`/experiments/${result.experiments?.slug}`}
-                          style={{
-                            fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)',
-                            textDecoration: 'none', fontFamily: "'Outfit', sans-serif",
-                          }}
-                        >
-                          {result.experiments?.title || 'Experiment'}
-                        </Link>
-                        <span style={{
-                          padding: '2px 8px', borderRadius: '100px', fontSize: '11px',
-                          background: 'rgba(6, 182, 212, 0.1)', color: 'var(--color-accent-cyan)',
+                      <div 
+                        onClick={() => setExpandedId(isExpanded ? null : result.id)}
+                        style={{
+                          padding: '20px 24px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '16px',
+                          cursor: 'pointer',
+                          background: isExpanded ? 'rgba(255,255,255,0.02)' : 'transparent',
+                        }}
+                      >
+                        <div style={{
+                          width: '44px', height: '44px', borderRadius: '12px',
+                          background: isExpanded ? 'var(--gradient-primary)' : 'rgba(139, 92, 246, 0.1)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '22px', flexShrink: 0,
+                          transition: 'all 0.3s ease',
+                          color: isExpanded ? 'white' : 'inherit',
                         }}>
-                          {result.experiments?.category}
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
-                        {formatOutput(result.output_data)}
-                      </p>
-                      <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '4px' }}>
-                        {formatDate(result.created_at)}
-                      </p>
-                    </div>
+                          {result.experiments?.icon || '🧪'}
+                        </div>
 
-                    <button
-                      onClick={() => handleDelete(result.id)}
-                      className="btn-danger"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                            <span style={{
+                              fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)',
+                              fontFamily: "'Outfit', sans-serif",
+                            }}>
+                              {result.experiments?.title || 'Experiment'}
+                            </span>
+                            <span style={{
+                              padding: '2px 8px', borderRadius: '100px', fontSize: '11px',
+                              background: 'rgba(6, 182, 212, 0.1)', color: 'var(--color-accent-cyan)',
+                            }}>
+                              {result.experiments?.category}
+                            </span>
+                          </div>
+                          <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                            {formatDate(result.created_at)}
+                          </p>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+                            {isExpanded ? 'Hide Details ↑' : 'View Details ↓'}
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDelete(result.id); }}
+                            className="btn-danger"
+                            style={{ padding: '6px 12px' }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Expanded Content */}
+                      {isExpanded && (
+                        <div className="animate-fade-in" style={{ 
+                          padding: '0 24px 24px',
+                          borderTop: '1px solid var(--color-border)',
+                          marginTop: '-1px',
+                        }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '24px' }}>
+                            {/* Data Column */}
+                            <div>
+                              <h4 style={{ fontSize: '14px', marginBottom: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📋 Parameters</h4>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                {Object.entries(result.input_params).map(([k, v]) => (
+                                  <div key={k} style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--color-border)' }}>
+                                    <div style={{ fontSize: '10px', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>{k}</div>
+                                    <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>{String(v)}</div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              <h4 style={{ fontSize: '14px', marginBottom: '12px', marginTop: '24px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📈 Results</h4>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                {Object.entries(result.output_data).map(([k, v]) => (
+                                  <div key={k} style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
+                                    <div style={{ fontSize: '10px', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>{k}</div>
+                                    <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-accent-purple)' }}>{String(v)}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Graph Column */}
+                            <div>
+                              <h4 style={{ fontSize: '14px', marginBottom: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📊 Reconstructed Graph</h4>
+                              <div style={{ height: '200px', width: '100%', marginBottom: '12px' }}>
+                                <Graph 
+                                  data={vPts} 
+                                  xLabel="Time (ms)" 
+                                  yLabel="Voltage (V)" 
+                                  title={mode === 'charge' ? 'Charging Curve' : 'Discharge Curve'}
+                                  color="#8b5cf6"
+                                  height={200}
+                                  showArea
+                                />
+                              </div>
+                              <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', textAlign: 'center' }}>
+                                Graph generated for τ = {tau.toFixed(1)} ms
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
               </div>
             )}
           </div>
