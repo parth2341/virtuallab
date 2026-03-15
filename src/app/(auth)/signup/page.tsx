@@ -104,7 +104,7 @@ export default function SignupPage() {
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '15px', marginTop: '8px' }}>
           {step === 'details' 
             ? 'Start your scientific journey today' 
-            : `We've sent a 6-digit code to ${email}`}
+            : `We've sent an 8-digit code to ${email}`}
         </p>
       </div>
 
