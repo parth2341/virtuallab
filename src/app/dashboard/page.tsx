@@ -333,7 +333,7 @@ export default function DashboardPage() {
                                   xLabel="Time (ms)" 
                                   yLabel="Voltage (V)" 
                                   title={mode === 'charge' ? 'Charging Curve' : 'Discharge Curve'}
-                                  color="#8b5cf6"
+                                  color="#ff0000"
                                   height={200}
                                   showArea
                                 />
