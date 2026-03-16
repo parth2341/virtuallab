@@ -326,7 +326,7 @@ export default function DashboardPage() {
 
                             {/* Graph Column */}
                             <div>
-                              <h4 style={{ fontSize: '14px', marginBottom: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📊 Reconstructed Graph</h4>
+                              <h4 style={{ fontSize: '14px', marginBottom: '14px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📊 Reconstructed Graph</h4>
                               <div style={{ height: '200px', width: '100%', marginBottom: '12px' }}>
                                 <Graph 
                                   data={vPts} 
